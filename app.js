@@ -1,0 +1,75 @@
+const express = require('express');
+const session = require('express-session');
+const { PrismaSessionStore } = require('@quixo3/prisma-session-store');
+const { PrismaClient } = require('./generated/prisma');
+const passport = require('passport');
+const flash = require('connect-flash');
+const path = require('path');
+
+const app = express();
+const prisma = new PrismaClient();
+
+// Set EJS as templating engine
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+
+// Session configuration with Prisma store
+app.use(session({
+  cookie: {
+    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+  },
+  secret: process.env.SESSION_SECRET || 'your-secret-key',
+  resave: true,
+  saveUninitialized: true,
+  store: new PrismaSessionStore(
+    prisma,
+    {
+      checkPeriod: 2 * 60 * 1000,  // Check for expired sessions every 2 minutes
+      dbRecordIdIsSessionId: true,
+      dbRecordIdFunction: undefined,
+    }
+  )
+}));
+
+// Initialize passport
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Flash messages middleware (must come after session)
+app.use(flash());
+
+// Configure passport strategies AFTER passport is initialized
+require('./src/config/passport')(passport);
+
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+
+app.use(express.static('public'));
+
+// Make user and flash messages available in all templates
+app.use((req, res, next) => {
+    res.locals.user = req.user || null;
+    res.locals.error = req.flash('error');
+    res.locals.success = req.flash('success');
+    next();
+});
+
+// Routes
+app.use('/', require('./src/routes/index'));
+app.use('/auth', require('./src/routes/auth'));
+app.use('/folders', require('./src/routes/folders'));
+app.use('/files', require('./src/routes/files'));
+
+// Add a basic home route
+app.get('/', (req, res) => {
+    res.render('index', { title: 'File Uploader' });
+});
+
+// Start the server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+});
+
+module.exports = app;
+

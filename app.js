@@ -17,6 +17,12 @@ if (missingEnvVars.length > 0) {
   }
 }
 
+// Override DATABASE_URL if EXTERNAL_DATABASE_URL is provided
+if (process.env.EXTERNAL_DATABASE_URL) {
+  process.env.DATABASE_URL = process.env.EXTERNAL_DATABASE_URL;
+  console.log('Using external database URL');
+}
+
 const app = express();
 const prisma = new PrismaClient();
 

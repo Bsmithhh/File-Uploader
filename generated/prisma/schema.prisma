@@ -1,0 +1,63 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Session {
+  id        String   @id
+  sid       String   @unique
+  data      String
+  expiresAt DateTime
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  firstName String
+  lastName  String
+  createdAt DateTime @default(now())
+
+  // Relationships
+  folders Folder[]
+  files   File[]
+}
+
+model Folder {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  userId    String
+
+  // Relationships
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  files File[]
+}
+
+model File {
+  id           String   @id @default(cuid())
+  filename     String // Stored filename
+  originalName String // User's original filename
+  mimetype     String // File type
+  size         Int // File size in bytes
+  uploadedAt   DateTime @default(now())
+  userId       String // Who uploaded it
+  folderId     String? // Which folder it's in (optional)
+  fileUrl      String // Cloudinary URL
+  publicId     String? // Cloudinary public ID for deletion
+
+  // Relationships
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  folder Folder? @relation(fields: [folderId], references: [id], onDelete: SetNull)
+}

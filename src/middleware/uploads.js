@@ -3,11 +3,22 @@ const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const cloudinary = require('cloudinary').v2;
 
 // Configure Cloudinary
-cloudinary.config({
+const cloudinaryConfig = {
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET
-});
+};
+
+// Check if Cloudinary is properly configured
+const cloudinaryEnvVars = ['CLOUDINARY_CLOUD_NAME', 'CLOUDINARY_API_KEY', 'CLOUDINARY_API_SECRET'];
+const missingCloudinaryVars = cloudinaryEnvVars.filter(envVar => !process.env[envVar]);
+
+if (missingCloudinaryVars.length > 0) {
+  console.warn('Missing Cloudinary environment variables:', missingCloudinaryVars.join(', '));
+  console.warn('File uploads will not work properly without Cloudinary configuration');
+}
+
+cloudinary.config(cloudinaryConfig);
 
 // Cloudinary storage
 const storage = new CloudinaryStorage({

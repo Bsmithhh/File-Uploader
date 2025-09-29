@@ -6,8 +6,31 @@ const passport = require('passport');
 const flash = require('connect-flash');
 const path = require('path');
 
+// Check for required environment variables
+const requiredEnvVars = ['DATABASE_URL', 'SESSION_SECRET'];
+const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
+
+if (missingEnvVars.length > 0) {
+  console.error('Missing required environment variables:', missingEnvVars.join(', '));
+  if (process.env.NODE_ENV === 'production') {
+    process.exit(1);
+  }
+}
+
 const app = express();
 const prisma = new PrismaClient();
+
+// Test database connection
+prisma.$connect()
+  .then(() => {
+    console.log('Database connected successfully');
+  })
+  .catch((error) => {
+    console.error('Database connection failed:', error);
+    if (process.env.NODE_ENV === 'production') {
+      process.exit(1);
+    }
+  });
 
 // Set EJS as templating engine
 app.set('view engine', 'ejs');
@@ -60,10 +83,6 @@ app.use('/auth', require('./src/routes/auth'));
 app.use('/folders', require('./src/routes/folders'));
 app.use('/files', require('./src/routes/files'));
 
-// Add a basic home route
-app.get('/', (req, res) => {
-    res.render('index', { title: 'File Uploader' });
-});
 
 // Start the server
 const PORT = process.env.PORT || 3000;

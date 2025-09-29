@@ -2,16 +2,18 @@
   "name": "file-uploader",
   "version": "1.0.0",
   "description": "Express.js file uploader with Prisma and Passport authentication",
-  "main": "src/index.js",
+  "main": "app.js",
   "scripts": {
-    "start": "node src/index.js",
-    "dev": "nodemon src/index.js",
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "build": "prisma generate",
     "test": "jest",
     "test:watch": "jest --watch",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
-    "prisma:seed": "node prisma/seed.js"
+    "prisma:seed": "node prisma/seed.js",
+    "vercel-build": "prisma generate && prisma migrate deploy"
   },
   "keywords": [
     "express",

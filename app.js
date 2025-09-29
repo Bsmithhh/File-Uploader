@@ -6,17 +6,6 @@ const passport = require('passport');
 const flash = require('connect-flash');
 const path = require('path');
 
-// Check for required environment variables
-const requiredEnvVars = ['DATABASE_URL', 'SESSION_SECRET'];
-const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
-
-if (missingEnvVars.length > 0) {
-  console.error('Missing required environment variables:', missingEnvVars.join(', '));
-  if (process.env.NODE_ENV === 'production') {
-    process.exit(1);
-  }
-}
-
 // Debug logging
 console.log('DATABASE_URL:', process.env.DATABASE_URL ? 'SET' : 'NOT SET');
 console.log('EXTERNAL_DATABASE_URL:', process.env.EXTERNAL_DATABASE_URL ? 'SET' : 'NOT SET');
@@ -28,6 +17,17 @@ if (process.env.EXTERNAL_DATABASE_URL) {
   console.log('Using external database URL');
 } else {
   console.log('EXTERNAL_DATABASE_URL not found, using default DATABASE_URL');
+}
+
+// Check for required environment variables (after override)
+const requiredEnvVars = ['DATABASE_URL', 'SESSION_SECRET'];
+const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
+
+if (missingEnvVars.length > 0) {
+  console.error('Missing required environment variables:', missingEnvVars.join(', '));
+  if (process.env.NODE_ENV === 'production') {
+    process.exit(1);
+  }
 }
 
 const app = express();

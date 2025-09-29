@@ -17,10 +17,17 @@ if (missingEnvVars.length > 0) {
   }
 }
 
+// Debug logging
+console.log('DATABASE_URL:', process.env.DATABASE_URL ? 'SET' : 'NOT SET');
+console.log('EXTERNAL_DATABASE_URL:', process.env.EXTERNAL_DATABASE_URL ? 'SET' : 'NOT SET');
+
 // Override DATABASE_URL if EXTERNAL_DATABASE_URL is provided
 if (process.env.EXTERNAL_DATABASE_URL) {
+  console.log('Overriding DATABASE_URL with external URL');
   process.env.DATABASE_URL = process.env.EXTERNAL_DATABASE_URL;
   console.log('Using external database URL');
+} else {
+  console.log('EXTERNAL_DATABASE_URL not found, using default DATABASE_URL');
 }
 
 const app = express();

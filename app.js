@@ -97,6 +97,12 @@ app.use('/folders', require('./src/routes/folders'));
 app.use('/files', require('./src/routes/files'));
 
 
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error('Error:', err);
+    res.status(500).json({ error: 'Internal Server Error', details: err.message });
+});
+
 // Start the server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
